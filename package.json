@@ -8,6 +8,7 @@
   },
   "scripts": {
     "copy-archive": "node copy-old-archive-to-firestore.js",
+    "archive": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,12 +22,15 @@
   },
   "homepage": "https://github.com/townhallproject/archive-manager#readme",
   "dependencies": {
+    "ajv": "^6.10.2",
+    "bluebird": "^3.5.5",
+    "dotenv": "^8.0.0",
     "firebase-admin": "^8.3.0",
-    "moment": "^2.24.0",
+    "lodash": "^4.17.15",
+    "moment-timezone": "^0.5.26",
     "superagent": "^5.1.0"
   },
   "devDependencies": {
-    "dotenv": "^8.0.0",
     "jest": "^24.8.0"
   }
 }
