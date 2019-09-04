@@ -192,7 +192,7 @@ class TownHall {
     })
   }
 
-  static removeOld = function removeOld(level, townhallPath, archivePath) {
+  static removeOld(level, townhallPath, archivePath) {
     const log = (...items) => {
       console.error(townhallPath, ...items);
     }
@@ -242,11 +242,11 @@ getStateLegs()
     promises.push(TownHall.removeOld(
       'state',
       `/state_townhalls/${state}/`,
-      `/archived_state_town_halls/${state}/`,
+      `/archived_town_halls/`,
     ));
   });
 
-  promises.push(TownHall.removeOld('federal', '/townHalls/', '/archived_town_halls/'));
+  // promises.push(TownHall.removeOld('federal', '/townHalls/', '/archived_town_halls/'));
 
   return Promise.all(promises);
 })
