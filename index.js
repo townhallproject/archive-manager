@@ -148,18 +148,19 @@ const makeArchiveEvent = (level, th) => {
   return out
 }
 
-const validateEvent = th => {
+const validateEvent = (thList, th) => {
   // Validate that it complies with our schema
   const valid = validate.townHall(th);
-
+  
   if (!valid) {
     console.error(th);
     console.error(validate.townHall.errors);
-
-    return false
+    thList.invalid.push(th);
+  } else {
+    thList.valid.push(th);
   }
 
-  return true;
+  return thList;
 }
 
 // oldPath is the path that the original event came from
@@ -192,7 +193,7 @@ class TownHall {
     })
   }
 
-  static removeOld(level, townhallPath, archivePath) {
+  static removeOld = function removeOld(level, townhallPath, archivePath) {
     const log = (...items) => {
       console.error(townhallPath, ...items);
     }
@@ -223,10 +224,14 @@ class TownHall {
       .map(th => makeArchiveEvent(level, th))
       .tap(events => log("archivable events:", events.length))
       // Ensure we have a valid event
-      .filter(validateEvent)
-      .tap(events => log("valid events:", events.length))
+      .reduce(validateEvent, {valid: [], invalid: []})
+      .tap(events => log("valid events:", events.valid.length))
+      .tap(events => log("invalid events:", events.invalid.length))
       // Actually move the event
-      .map(th => moveEvent(townhallPath, th))
+      .tap(events => {
+        events.valid.forEach(th => moveEvent(townhallPath, th));
+      })
+      // .map(th => moveEvent(townhallPath, th))
       // Log the number of events we actually moved
       .tap(events => log("archived events:", events.length))
       .catch(console.error);
@@ -242,11 +247,11 @@ getStateLegs()
     promises.push(TownHall.removeOld(
       'state',
       `/state_townhalls/${state}/`,
-      `/archived_town_halls/`,
+      `/archived_state_town_halls/${state}/`,
     ));
   });
 
-  // promises.push(TownHall.removeOld('federal', '/townHalls/', '/archived_town_halls/'));
+  promises.push(TownHall.removeOld('federal', '/townHalls/', '/archived_town_halls/'));
 
   return Promise.all(promises);
 })
