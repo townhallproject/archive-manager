@@ -96,7 +96,10 @@ const makeArchiveEvent = (level, th) => {
     if (th[property] && th[property] !== undefined) {
       out[property] = th[property];
 
-      return
+      return {
+        th,
+        valid: false,
+      }
     }
 
     switch (attrs.type) {
@@ -146,12 +149,23 @@ const makeArchiveEvent = (level, th) => {
     out.level = level;
   }
 
-  return out
+  return {
+    th: out,
+    valid: true,
+  }
 }
 
-const validateEvent = (th) => {
+const validateEvent = (data) => {
+  let {
+    th,
+    valid,
+  } = data;
+
+  if (!valid) {
+    return data;
+  }
   // Validate that it complies with our schema
-  const valid = validate.townHall(th);
+  valid = validate.townHall(th);
   return {
     th,
     valid,
@@ -167,12 +181,12 @@ const moveEvent = (oldPath, data) => {
   if (data.valid) {
     return firestore.collection('archived_town_halls').doc(th.eventId).set(th)
       .then(() => {
-        console.log('moved event', th.eventId)
+        // console.log('moved event', th.eventId)
       })
   } else {
     return firestore.collection('failed_archived_town_halls').doc(th.eventId).set(th)
       .then(() => {
-        console.log('moved failed event', th.eventId);
+        // console.log('moved failed event', th.eventId);
         return firebase.ref(`failed_archived_town_halls/${th.eventId}`).update(th)
       })
   }
@@ -225,10 +239,10 @@ class TownHall {
       .tap(events => log("total events:", events.length))
       // Filter out any events too new, recurring, etc.
       .filter(th => checkTimestamp(th, time))
-      .tap(events => log("archivable events:", events.length))
+      .tap(events => log("past events:", events.length))
       // Construct a new archive-schema event
       .map(th => makeArchiveEvent(level, th))
-      .tap(events => log("archivable events:", events.length))
+      .tap(events => log("passed JSON validation:", events.filter(data => data.valid).length))
       // Ensure we have a valid event
       .map(tp => validateEvent(tp))
       .tap(events => log("valid events:", events.filter(data => data.valid).length))
