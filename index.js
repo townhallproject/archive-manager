@@ -154,7 +154,7 @@ const validateEvent = (thList, th) => {
   const valid = validate.townHall(th);
   
   if (!valid) {
-    console.error(th);
+    console.error('validation error: ' + th.eventId);
     console.error(validate.townHall.errors);
     thList.invalid.push(th);
   } else {
@@ -169,8 +169,8 @@ const validateEvent = (thList, th) => {
 const moveEvent = (oldPath, th) => {
   // Grab the original record so we can delete it after
   var oldTownHall = firebase.ref(oldPath + th.eventId);
-
   return firestore.collection('archived_town_halls').doc(th.eventId).set(th)
+  .catch(console.log)
   /*
   .then(oldTownHall.remove)
   .then(() => {
@@ -230,14 +230,20 @@ class TownHall {
       .tap(events => log("invalid events:", events.invalid.length))
       // Actually move the event
       .tap(events => {
-        events.valid.forEach(th => moveEvent(townhallPath, th));
+        events.valid.map(th => moveEvent(townhallPath, th));
+        return events;
       })
       // .map(th => moveEvent(townhallPath, th))
       // Log the number of events we actually moved
-      .tap(events => log("archived events:", events.length))
+      .tap(events => log("archived events:", events.valid.length))
       .catch(console.error);
   };
 }
+
+
+firestore.collection('archived_town_halls').doc('something').set({
+  a: 'a'
+})
 
 getStateLegs()
 .then(states => {
