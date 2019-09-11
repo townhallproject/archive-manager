@@ -149,28 +149,32 @@ const makeArchiveEvent = (level, th) => {
   return out
 }
 
-const validateEvent = (thList, th) => {
+const validateEvent = (th) => {
   // Validate that it complies with our schema
   const valid = validate.townHall(th);
-  
-  if (!valid) {
-    console.error('validation error: ' + th.eventId);
-    console.error(validate.townHall.errors);
-    thList.invalid.push(th);
-  } else {
-    thList.valid.push(th);
+  return {
+    th,
+    valid,
   }
-
-  return thList;
 }
 
 // oldPath is the path that the original event came from
 // th is the new event to go into the archive
-const moveEvent = (oldPath, th) => {
+const moveEvent = (oldPath, data) => {
+  const { th } = data;
   // Grab the original record so we can delete it after
   var oldTownHall = firebase.ref(oldPath + th.eventId);
-  return firestore.collection('archived_town_halls').doc(th.eventId).set(th)
-  .catch(console.log)
+  if (data.valid) {
+    return firestore.collection('archived_town_halls').doc(th.eventId).set(th)
+      .then(() => {
+        console.log('moved event', th.eventId)
+      })
+  } else {
+    return firestore.collection('failed_archived_town_halls').doc(th.eventId).set(th)
+      .then(() => {
+        console.log('moved failed event', th.eventId)
+      })
+  }
   /*
   .then(oldTownHall.remove)
   .then(() => {
@@ -194,7 +198,7 @@ class TownHall {
     })
   }
 
-  static removeOld = function removeOld(level, townhallPath, archivePath) {
+  static removeOld (level, townhallPath, archivePath) {
     const log = (...items) => {
       console.error(townhallPath, ...items);
     }
@@ -225,29 +229,21 @@ class TownHall {
       .map(th => makeArchiveEvent(level, th))
       .tap(events => log("archivable events:", events.length))
       // Ensure we have a valid event
-      .reduce(validateEvent, {valid: [], invalid: []})
-      .tap(events => log("valid events:", events.valid.length))
-      .tap(events => log("invalid events:", events.invalid.length))
+      .map(tp => validateEvent(tp))
+      .tap(events => log("valid events:", events.filter(data => data.valid).length))
+      .tap(events => log("invalid events:", events.filter(data => !data.valid).length))
       // Actually move the event
-      .tap(events => {
-        events.valid.map(th => moveEvent(townhallPath, th));
-        return events;
-      })
-      // .map(th => moveEvent(townhallPath, th))
+
+      .map(th => moveEvent(townhallPath, th))
       // Log the number of events we actually moved
-      .tap(events => log("archived events:", events.valid.length))
+      // .tap(events => log("archived events:", events.valid.length))
       .catch(console.error);
   };
 }
 
-
-firestore.collection('archived_town_halls').doc('something').set({
-  a: 'a'
-})
-
 getStateLegs()
 .then(states => {
-  console.log('states', states);
+  // console.log('states', states);
 
   const promises = []
   states.forEach(state => {
