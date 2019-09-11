@@ -172,7 +172,8 @@ const moveEvent = (oldPath, data) => {
   } else {
     return firestore.collection('failed_archived_town_halls').doc(th.eventId).set(th)
       .then(() => {
-        console.log('moved failed event', th.eventId)
+        console.log('moved failed event', th.eventId);
+        return firebase.ref(`failed_archived_town_halls/${th.eventId}`).update(th)
       })
   }
   /*
@@ -233,7 +234,6 @@ class TownHall {
       .tap(events => log("valid events:", events.filter(data => data.valid).length))
       .tap(events => log("invalid events:", events.filter(data => !data.valid).length))
       // Actually move the event
-
       .map(th => moveEvent(townhallPath, th))
       // Log the number of events we actually moved
       // .tap(events => log("archived events:", events.valid.length))
