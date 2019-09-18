@@ -186,7 +186,7 @@ const moveEvent = (oldPath, data) => {
   } else {
     return firestore.collection('failed_archived_town_halls').doc(th.eventId).set(th)
       .then(() => {
-        // console.log('moved failed event', th.eventId);
+        console.log('moved failed event', th.eventId);
         return firebase.ref(`failed_archived_town_halls/${th.eventId}`).update(th)
       })
   }
