@@ -96,7 +96,10 @@ const makeArchiveEvent = (level, th) => {
     if (th[property] && th[property] !== undefined) {
       out[property] = th[property];
 
-      return
+      return {
+        th,
+        valid: false,
+      }
     }
 
     switch (attrs.type) {
@@ -126,9 +129,10 @@ const makeArchiveEvent = (level, th) => {
   }
 
   // Set the human-readable timestamps
-  out.timeStart = moment(th.dateObj).tz(th.zoneString).format();
-  out.timeEnd = moment(`${th.yearMonthDay} ${th.timeEnd}`, 'YYYY-MM-DD hh:mm A').tz(th.zoneString).format();
-  out.lastUpdated = moment(th.lastUpdated).tz(th.zoneString).format();
+  const tzString = th.zoneString ? th.zoneString : 'UTC';
+  out.timeStart = moment(th.dateObj).tz(tzString).format();
+  out.timeEnd = moment(`${th.yearMonthDay} ${th.timeEnd}`, 'YYYY-MM-DD hh:mm A').tz(tzString).format();
+  out.lastUpdated = moment(th.lastUpdated).tz(tzString).format();
 
   // Cast the House and Senate to lower and upper
   switch (th.chamber) {
@@ -145,30 +149,47 @@ const makeArchiveEvent = (level, th) => {
     out.level = level;
   }
 
-  return out
+  return {
+    th: out,
+    valid: true,
+  }
 }
 
-const validateEvent = th => {
-  // Validate that it complies with our schema
-  const valid = validate.townHall(th);
+const validateEvent = (data) => {
+  let {
+    th,
+    valid,
+  } = data;
 
   if (!valid) {
-    console.error(th);
-    console.error(validate.townHall.errors);
-
-    return false
+    return data;
   }
-
-  return true;
+  // Validate that it complies with our schema
+  valid = validate.townHall(th);
+  return {
+    th,
+    valid,
+  }
 }
 
 // oldPath is the path that the original event came from
 // th is the new event to go into the archive
-const moveEvent = (oldPath, th) => {
+const moveEvent = (oldPath, data) => {
+  const { th } = data;
   // Grab the original record so we can delete it after
   var oldTownHall = firebase.ref(oldPath + th.eventId);
-
-  return firestore.collection('archived_town_halls').doc(th.eventId).set(th)
+  if (data.valid) {
+    return firestore.collection('archived_town_halls').doc(th.eventId).set(th)
+      .then(() => {
+        // console.log('moved event', th.eventId)
+      })
+  } else {
+    return firestore.collection('failed_archived_town_halls').doc(th.eventId).set(th)
+      .then(() => {
+        // console.log('moved failed event', th.eventId);
+        return firebase.ref(`failed_archived_town_halls/${th.eventId}`).update(th)
+      })
+  }
   /*
   .then(oldTownHall.remove)
   .then(() => {
@@ -192,7 +213,7 @@ class TownHall {
     })
   }
 
-  static removeOld(level, townhallPath, archivePath) {
+  static removeOld (level, townhallPath, archivePath) {
     const log = (...items) => {
       console.error(townhallPath, ...items);
     }
@@ -218,35 +239,36 @@ class TownHall {
       .tap(events => log("total events:", events.length))
       // Filter out any events too new, recurring, etc.
       .filter(th => checkTimestamp(th, time))
-      .tap(events => log("archivable events:", events.length))
+      .tap(events => log("past events:", events.length))
       // Construct a new archive-schema event
       .map(th => makeArchiveEvent(level, th))
-      .tap(events => log("archivable events:", events.length))
+      .tap(events => log("passed JSON validation:", events.filter(data => data.valid).length))
       // Ensure we have a valid event
-      .filter(validateEvent)
-      .tap(events => log("valid events:", events.length))
+      .map(tp => validateEvent(tp))
+      .tap(events => log("valid events:", events.filter(data => data.valid).length))
+      .tap(events => log("invalid events:", events.filter(data => !data.valid).length))
       // Actually move the event
       .map(th => moveEvent(townhallPath, th))
       // Log the number of events we actually moved
-      .tap(events => log("archived events:", events.length))
+      // .tap(events => log("archived events:", events.valid.length))
       .catch(console.error);
   };
 }
 
 getStateLegs()
 .then(states => {
-  console.log('states', states);
+  // console.log('states', states);
 
   const promises = []
   states.forEach(state => {
     promises.push(TownHall.removeOld(
       'state',
       `/state_townhalls/${state}/`,
-      `/archived_town_halls/`,
+      `/archived_state_town_halls/${state}/`,
     ));
   });
 
-  // promises.push(TownHall.removeOld('federal', '/townHalls/', '/archived_town_halls/'));
+  promises.push(TownHall.removeOld('federal', '/townHalls/', '/archived_town_halls/'));
 
   return Promise.all(promises);
 })
