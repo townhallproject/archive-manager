@@ -95,11 +95,7 @@ const makeArchiveEvent = (level, th) => {
   _.forEach(validate.townHallSchema.properties, (attrs, property) => {
     if (th[property] && th[property] !== undefined) {
       out[property] = th[property];
-
-      return {
-        th,
-        valid: false,
-      }
+      return;
     }
 
     switch (attrs.type) {
@@ -149,23 +145,12 @@ const makeArchiveEvent = (level, th) => {
     out.level = level;
   }
 
-  return {
-    th: out,
-    valid: true,
-  }
+  return out;
 }
 
-const validateEvent = (data) => {
-  let {
-    th,
-    valid,
-  } = data;
-
-  if (!valid) {
-    return data;
-  }
+const validateEvent = (th) => {
   // Validate that it complies with our schema
-  valid = validate.townHall(th);
+  let valid = validate.townHall(th);
   return {
     th,
     valid,
@@ -175,10 +160,10 @@ const validateEvent = (data) => {
 // oldPath is the path that the original event came from
 // th is the new event to go into the archive
 const moveEvent = (oldPath, data) => {
-  const { th } = data;
+  const { th, valid } = data;
   // Grab the original record so we can delete it after
   var oldTownHall = firebase.ref(oldPath + th.eventId);
-  if (data.valid) {
+  if (valid) {
     return firestore.collection('archived_town_halls').doc(th.eventId).set(th)
       .then(() => {
         // console.log('moved event', th.eventId)
@@ -242,7 +227,7 @@ class TownHall {
       .tap(events => log("past events:", events.length))
       // Construct a new archive-schema event
       .map(th => makeArchiveEvent(level, th))
-      .tap(events => log("passed JSON validation:", events.filter(data => data.valid).length))
+      .tap(events => log("passed conversion:", events.length))
       // Ensure we have a valid event
       .map(tp => validateEvent(tp))
       .tap(events => log("valid events:", events.filter(data => data.valid).length))
