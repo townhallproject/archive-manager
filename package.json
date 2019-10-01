@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "copy-archive": "node copy-old-archive-to-firestore.js",
+    "copy-archive": "node src/one-time-scripts/copy-old-archive-to-firestore.js",
     "archive": "node src/archive-handling/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
