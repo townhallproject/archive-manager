@@ -82,7 +82,7 @@ const townHallSchema = {
       "type": "string",
     },
     "govtrack_id": {
-      "description": "GovTrack ID assigned to the memeber, if elected",
+      "description": "GovTrack ID assigned to the member, if elected",
       "type": "integer",
     },
     "iconFlag": {
@@ -137,6 +137,7 @@ const townHallSchema = {
         "I",
         "Independent",
         "Nonpartisan",
+        "Unaffiliated",
       ],
     },
     "state": {

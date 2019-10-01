@@ -8,7 +8,7 @@
   },
   "scripts": {
     "copy-archive": "node copy-old-archive-to-firestore.js",
-    "archive": "node index.js",
+    "archive": "node src/archive-handling/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
