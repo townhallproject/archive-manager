@@ -64,7 +64,7 @@ const checkTimestamp = (th, now) => {
   return true;
 }
 
-const validateEvent = (th) => {
+export const validateEvent = (th) => {
   // Validate that it complies with our schema
   let valid = validate.townHall(th);
   return {
