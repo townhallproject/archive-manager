@@ -9,14 +9,36 @@ const validate = require('../lib/schema.js');
 const moveEvent = require('../archive-handling/move-event');
 const makeArchiveEvent = require('../archive-handling/transform-to-archive-schema');
 const getStateLegs = require('../lib/get-state-legs');
+const getMocData = require('../lib/get-moc-data');
 
 const {
     firebase
 } = require('../lib/setupFirebase');
 
+let mocData;
+
+const convertEvent = (level, th) => {
+    // use mocdata for federal events missing chamber
+    if (level === "federal" && th.govtrack_id && mocData) {
+        const moc = mocData[th.govtrack_id];
+        if (!th.chamber && moc.chamber) {
+            const mapping = {
+                House: 'lower',
+                Senate: 'upper',
+            }
+            const newChamber = mapping[moc.chamber] || moc.chamber;
+            th.chamber = newChamber;
+        }
+      
+        if (moc.propublica_id) {
+            th.officePersonId = moc.propublica_id;
+        }
+    }
+    return makeArchiveEvent(level, th);
+}
 
 const validateEvent = (th) => {
-
+  
     // Validate that it complies with our schema
     let valid = validate.townHall(th);
     if (!valid) console.log(validate.townHall.errors);
@@ -24,7 +46,7 @@ const validateEvent = (th) => {
     return {
         th,
         valid,
-        errors: !valid ? validate.townHall.errors : null,
+        error: !valid ? validate.townHall.errors[0] : null,
     }
 }
 
@@ -62,8 +84,7 @@ class TownHall {
             })
             .tap(events => log("total events:", events.length))
             // Construct a new archive-schema event
-            .map(th => makeArchiveEvent(level, th))
-            .tap(events => log("passed JSON conversion:", events.length))
+            .map(th => convertEvent(level, th))
             // Ensure we have a valid event
             .map(tp => validateEvent(tp))
             .tap(events => log("valid events:", events.filter(data => data.valid).length))
@@ -76,21 +97,30 @@ class TownHall {
     };
 }
 
-
-const states = ["AZ", "CO", 'FL', 'MD', 'ME', 'MI', 'MN', 'NC', 'NE', 'NV', 'OR', 'PA', 'VA'];
-const promises = []
-states.forEach(state => {
-    promises.push(TownHall.copyToNewArchive(
-        'state',
-        `/archived_state_town_halls/${state}/`,
-        `/archived_state_town_halls/${state}/`,
-    ));
-});
-
-// promises.push(TownHall.copyToNewArchive('federal', '/archived_town_halls/', '/archived_town_halls/'));
-
-return Promise.all(promises);
-    // .then(() => {
-    //     console.error("complete");
-    //     process.exit(0);
-    // })
+getMocData()
+    .then(returnedData => {
+        mocData = returnedData;
+    })
+    .then(() => {
+        getStateLegs()
+            .then(states => {
+                console.log('states', states);
+        
+                const promises = []
+                states.forEach(state => {
+                    promises.push(TownHall.copyToNewArchive(
+                        'state',
+                        `/archived_state_town_halls/${state}/`,
+                        `/archived_state_town_halls/${state}/`,
+                    ));
+                });
+                
+                promises.push(TownHall.copyToNewArchive('federal', '/archived_town_halls/', '/archived_town_halls/'));
+                
+                return Promise.all(promises)
+                    .then(() => {
+                        console.error("complete");
+                        process.exit(0);
+                    })
+        })
+    })
