@@ -13,6 +13,7 @@ const {
 
 const moveEvent = require('./move-event');
 const makeArchiveEvent = require('./transform-to-archive-schema');
+const validateEvent = require('../one-time-scripts/validate-event');
 
 
 // Get the user ID if it's not an email address
@@ -59,19 +60,7 @@ const checkTimestamp = (th, now) => {
   if (th.repeatingEvent) {
     return false;
   }
-
-
   return true;
-}
-
-export const validateEvent = (th) => {
-  // Validate that it complies with our schema
-  let valid = validate.townHall(th);
-  return {
-    th,
-    valid,
-    errors: !valid ? validate.townHall.errors[0] : null,
-  }
 }
 
 class TownHall {
@@ -144,5 +133,4 @@ getStateLegs()
   console.error("complete");
   process.exit(0);
 })
-
 
