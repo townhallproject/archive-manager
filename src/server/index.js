@@ -10,8 +10,13 @@ const app = express();
 app.use(express.json());
 
 app.post('/update-event', (req, res) => {
-  const validated = validateEvent(req.body);
-  res.send(validated);
+  const {
+    th,
+    valid,
+    error,
+  } = validateEvent(req.body);
+  th.error = error;
+  res.send(th);
 });
 
 const server = app.listen(5000, () => {

@@ -22,7 +22,7 @@ const moveEvent = (oldPath, data) => {
     } else {
         toSave = {
             ...th,
-            error: data.errors,
+            error: data.error,
         }
 
     }

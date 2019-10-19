@@ -7,7 +7,7 @@ const validateEvent = (th) => {
     return {
       th,
       valid,
-      errors: !valid ? validate.townHall.errors[0] : null,
+      error: !valid ? validate.townHall.errors[0] : null,
     }
   }
 
