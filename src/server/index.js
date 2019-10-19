@@ -11,8 +11,7 @@ app.use(express.json());
 
 app.post('/update-event', (req, res) => {
   const validated = validateEvent(req.body);
-  console.log(validated);
-  res.send('responding to update-event')
+  res.send(validated);
 });
 
 const server = app.listen(5000, () => {
