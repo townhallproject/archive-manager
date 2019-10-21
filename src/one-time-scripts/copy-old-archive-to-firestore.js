@@ -6,7 +6,7 @@ const _ = require('lodash');
 const Promise = require('bluebird');
 const validate = require('../lib/schema.js');
 
-const moveEvent = require('../archive-handling/move-event');
+const { moveEvent } = require('../archive-handling/move-event');
 const makeArchiveEvent = require('../archive-handling/transform-to-archive-schema');
 const getStateLegs = require('../lib/get-state-legs');
 const getMocData = require('../lib/get-moc-data');
