@@ -14,8 +14,10 @@ app.post('/update-event', (req, res) => {
     error,
   } = validateEvent(req.body);
   th.error = valid ? false : error;
-  saveEvent(th.eventId, th);
-  res.send(th);
+  saveEvent(th.eventId, th).then((writeResult) => {
+    console.log(writeResult);
+    res.send(th);
+  });
 });
 
 const server = app.listen(5000, () => {
