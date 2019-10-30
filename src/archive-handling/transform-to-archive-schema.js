@@ -61,6 +61,7 @@ const makeArchiveEvent = (level, th) => {
     const tzString = th.zoneString ? th.zoneString : 'UTC';
     out.timeStart = moment(th.dateObj).tz(tzString).format();
     out.timeEnd = moment(`${th.yearMonthDay} ${th.timeEnd}`, 'YYYY-MM-DD hh:mm A').tz(tzString).format();
+    out.timeZone = tzString;
     out.lastUpdated = moment(th.lastUpdated).tz(tzString).format();
 
     // Cast the House and Senate to lower and upper

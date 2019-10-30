@@ -61,6 +61,10 @@ const townHallSchema = {
       "description": "ISO time at which the event ends",
       "type": "string",
     },
+    "timeZone": {
+      "description": "Full name of time zone",
+      "type": "string",
+    },
     "validated": {
       "description": "Whether or not the record has been checked and validated",
       "type": "boolean",
@@ -232,6 +236,7 @@ const townHallSchema = {
     "timeEnd",
     "timeStart",
     "timestamp",
+    "timeZone",
     "validated",
   ],
 }
