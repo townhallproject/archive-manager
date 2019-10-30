@@ -21,6 +21,10 @@ const townHallSchema = {
       "description": "Address location of the event",
       "type": "string",
     },
+    "ada_accessible": {
+      "description": "ADA Accessible?",
+      "type": "boolean",
+    },
     "link": {
       "description": "Link to event website",
       "type": "string",
@@ -203,6 +207,7 @@ const townHallSchema = {
     },
   },
   "required": [
+    "ada_accessible",
     "address",
     "chamber",
     "dateCreated",
