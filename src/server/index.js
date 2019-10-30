@@ -7,7 +7,7 @@ const validateEvent = require('../one-time-scripts/validate-event');
 const app = express();
 app.use(express.json());
 
-app.post('/update-event', (req, res) => {
+app.post('/event', (req, res) => {
   const {
     th,
     valid,
