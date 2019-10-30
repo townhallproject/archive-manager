@@ -11,7 +11,7 @@ const {
   firebase
 } = require('../lib/setupFirebase');
 
-const moveEvent = require('./move-event');
+const { moveEvent } = require('./move-event');
 const makeArchiveEvent = require('./transform-to-archive-schema');
 const validateEvent = require('../one-time-scripts/validate-event');
 
