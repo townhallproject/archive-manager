@@ -207,6 +207,7 @@ const townHallSchema = {
         "AA",
         "AE",
         "AP",
+        "MP",
       ],
     },
   },
