@@ -3,7 +3,10 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { saveEvent } = require('../archive-handling/move-event');
+const { 
+  saveNewEvent,
+  updateEvent,
+} = require('../archive-handling/move-event');
 const validateEvent = require('../one-time-scripts/validate-event');
 
 const app = express();
@@ -19,7 +22,20 @@ app.post('/event', (req, res) => {
     error,
   } = validateEvent(req.body);
   th.error = valid ? false : error;
-  saveEvent(th.eventId, th).then((writeResult) => {
+  saveNewEvent(th.eventId, th).then((writeResult) => {
+    console.log(writeResult);
+    res.send(th);
+  });
+});
+
+app.patch('/event', (req, res) => {
+  const {
+    th,
+    valid,
+    error,
+  } = validateEvent(req.body);
+  th.error = valid ? false : error;
+  updateEvent(th.eventId, th).then((writeResult) => {
     console.log(writeResult);
     res.send(th);
   });
