@@ -6,6 +6,7 @@ const {
 } = require('../lib/setupFirebase.js');
 // oldPath is the path that the original event came from
 // th is the new event to go into the archive
+
 const moveEvent = (oldPath, data) => {
     const {
         th
@@ -26,23 +27,37 @@ const moveEvent = (oldPath, data) => {
         }
 
     }
-    return saveNewEvent(th.eventId, toSave)
-        .then(() => {
-            // console.log('moved event', th.eventId)
+    const checkIfNew = (eventId) => firestore.collection('archived_town_halls').doc(eventId).get()
+        .then((snap) => {
+            if (snap.exists) {
+                return false;
+            }
+            return true;
         })
 
-        //   .then(oldTownHall.remove)
-        //       .then(() => {
-        //           // Update the table of archived event refs
-        //           return firebase.ref(`/townHallIds/${th.eventId}`).update({
-        //               status: 'archived',
-        //               archive_path: 'archived_town_halls',
-        //           });
-        //       })
-        //       .then(() => {
-        //           // Update an event join against a user?
-        //           updateUserWhenEventArchived(th);
-        //       })
+    return checkIfNew(th.eventId).then((shouldSave) => {
+        if (!shouldSave) {
+            return Promise.resolve();
+        }
+        return saveEvent(th.eventId, toSave)
+            .then(() => {
+                console.log('moved event', th.eventId)
+            })
+    
+            //   .then(oldTownHall.remove)
+            //       .then(() => {
+            //           // Update the table of archived event refs
+            //           return firebase.ref(`/townHallIds/${th.eventId}`).update({
+            //               status: 'archived',
+            //               archive_path: 'archived_town_halls',
+            //           });
+            //       })
+            //       .then(() => {
+            //           // Update an event join against a user?
+            //           updateUserWhenEventArchived(th);
+            //       })
+        
+    })
 }
 
 const saveNewEvent = (eventId, data) => {
