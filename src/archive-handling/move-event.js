@@ -60,13 +60,16 @@ const moveEvent = (oldPath, data) => {
     })
 }
 
-
-
-const saveEvent = (eventId, data) => {
+const saveNewEvent = (eventId, data) => {
     return firestore.collection('archived_town_halls').doc(eventId).set(data);
+}
+
+const updateEvent = (eventId, data) => {
+    return firestore.collection('archived_town_halls').doc(eventId).update(data);
 }
 
 module.exports = {
     moveEvent,
-    saveEvent,
+    saveNewEvent,
+    updateEvent,
 }

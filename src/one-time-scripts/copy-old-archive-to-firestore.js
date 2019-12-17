@@ -12,10 +12,10 @@ const getStateLegs = require('../lib/get-state-legs');
 const getMocData = require('../lib/get-moc-data');
 
 const {
-    firebase
+    firebase,
 } = require('../lib/setupFirebase');
 
-let mocData;
+let mocData; 
 
 const convertEvent = (level, th) => {
     // use mocdata for federal events missing chamber
@@ -58,7 +58,7 @@ class TownHall {
         })
     }
 
-    static copyToNewArchive(level, realtimeArchivePath, archivePath) {
+    static copyToNewArchive(level, realtimeArchivePath) {
         const log = (...items) => {
             console.error(realtimeArchivePath, ...items);
         }
@@ -104,18 +104,16 @@ getMocData()
     .then(() => {
         getStateLegs()
             .then(states => {
-                console.log('states', states);
         
-                const promises = []
+                const promises = [];
                 states.forEach(state => {
                     promises.push(TownHall.copyToNewArchive(
                         'state',
                         `/archived_state_town_halls/${state}/`,
-                        `/archived_state_town_halls/${state}/`,
                     ));
                 });
                 
-                promises.push(TownHall.copyToNewArchive('federal', '/archived_town_halls/', '/archived_town_halls/'));
+                promises.push(TownHall.copyToNewArchive('federal', '/archived_town_halls/'));
                 
                 return Promise.all(promises)
                     .then(() => {

@@ -3,7 +3,13 @@ const validate = require('../lib/schema.js');
 
 const validateEvent = (th) => {
     // Validate that it complies with our schema
-    let valid = validate.townHall(th);
+    let valid = false;
+    if (th.repeatingEvent) {
+      valid = validate.repeatingEvent(th)
+    } else {
+      valid = validate.townHall(th);
+    }
+
     return {
       th,
       valid,

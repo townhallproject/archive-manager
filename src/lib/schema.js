@@ -1,8 +1,253 @@
 const Ajv = require('ajv');
 
+const repeatingTownHallSchema = {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://townhallproject.com/repeating-town-hall.json",
+  "title": "repeating town hall",
+  "description": "A TownHall repeating town hall event",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "location": {
+      "description": "Where the Town Hall is happening",
+      "type": "string"
+    },
+    "notes": {
+      "description": "Any additional notes about the event",
+      "type": "string",
+      "exclusiveMinimum": 0
+    },
+    "address": {
+      "description": "Address location of the event",
+      "type": "string",
+    },
+    "ada_accessible": {
+      "description": "ADA Accessible?",
+      "type": "boolean",
+    },
+    "link": {
+      "description": "Link to event website",
+      "type": "string",
+    },
+    "chamber": {
+      "description": "Chamber to which the host belongs",
+      "type": "string",
+      "enum": [
+        "citywide",
+        "lower",
+        "nationwide",
+        "statewide",
+        "upper",
+      ],
+    },
+    "dateCreated": {
+      "description": "Date and time the event was created",
+      "type": "string",
+    },
+    "dateValid": {
+      "description": "Date and time the event was created",
+      "type": "boolean",
+    },
+    "repeatingEvent": {
+      "description": "A string describing the time and day of the week the event repeats",
+      "type": "string"
+    },
+    "timestamp": {
+      "description": "UNIX timestamp at which the event starts",
+      "type": "integer",
+      "minimum": 1451606400, // 2016-01-01
+    },
+    "timeStart": {
+      "description": "ISO time at which the event starts",
+      "type": "string",
+    },
+    "timeEnd": {
+      "description": "ISO time at which the event ends",
+      "type": "string",
+    },
+    "timeZone": {
+      "description": "Full name of time zone",
+      "type": "string",
+    },
+    "validated": {
+      "description": "Whether or not the record has been checked and validated",
+      "type": "boolean",
+    },
+    "displayName": {
+      "description": "Name of the host, formatted for display",
+      "type": "string",
+    },
+    "district": {
+      "description": "District to which the host belongs",
+      "type": "string", // must be a string because some values have characters
+    },
+    "enteredBy": {
+      "description": "Email address of the submitter",
+      "type": "string",
+    },
+    "eventId": {
+      "description": "Firebase event ID",
+      "type": "string",
+    },
+    "eventName": {
+      "description": "Firebase event ID",
+      "type": "string",
+    },
+    "govtrack_id": {
+      "description": "GovTrack ID assigned to the member, if elected",
+      "type": "integer",
+    },
+    "iconFlag": {
+      "description": "Icon to use when displaying",
+      "type": "string",
+    },
+    "internalNotes": {
+      "description": "Notes for internal use",
+      "type": "string",
+    },
+    "lastUpdated": {
+      "description": "When the record was last updated in ISO8601 format",
+      "type": "string",
+    },
+    "officePersonId": {
+      "description": "Unique ID for the host/candidate/lawmaker/mayor/etc.",
+      "type": "string",
+    },
+    "lat": {
+      "description": "Latitude of the event",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 180,
+    },
+    "lng": {
+      "description": "Longitude of the event",
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180,
+    },
+    "meetingType": {
+      "description": "What type of meeting this is",
+      "type": "string",
+    },
+    "level": {
+      "description": "Level of government of the event",
+      "type": "string",
+      "enum": [
+        "city",
+        "state",
+        "federal",
+      ],
+    },
+    "party": {
+      "description": "What type of meeting this is",
+      "type": "string",
+      "enum": [
+        "D",
+        "R",
+        "Republican",
+        "Democratic",
+        "I",
+        "Independent",
+        "Nonpartisan",
+        "Unaffiliated",
+      ],
+    },
+    "state": {
+      "description": "State where the event takes place",
+      "type": "string",
+      "enum": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY",
+        "DC",
+        "MH",
+        "AA",
+        "AE",
+        "AP",
+        "MP",
+      ],
+    },
+  },
+  "required": [
+    "ada_accessible",
+    "address",
+    "chamber",
+    "dateCreated",
+    "dateValid",
+    "displayName",
+    "district",
+    "enteredBy",
+    "eventId",
+    "eventName",
+    "govtrack_id",
+    "iconFlag",
+    "internalNotes",
+    "lastUpdated",
+    "lat",
+    "level",
+    "link",
+    "lng",
+    "meetingType",
+    "officePersonId",
+    "party",
+    "state",
+    "timeZone",
+    "validated",
+    "repeatingEvent"
+  ],
+}
+
+
 const townHallSchema = {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://example.com/townhall.schema.json",
+  "$id": "http://townhallproject.com/townhall.json",
   "title": "Product",
   "description": "A TownHall event",
   "type": "object",
@@ -245,5 +490,5 @@ const townHallSchema = {
 module.exports = {
   townHallSchema,
   townHall: (new Ajv()).compile(townHallSchema),
+  repeatingEvent: (new Ajv()).compile(repeatingTownHallSchema),
 }
-

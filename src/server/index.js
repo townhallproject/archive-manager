@@ -1,9 +1,14 @@
 'use strict';
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
-const { saveEvent } = require('../archive-handling/move-event');
+
+const makeArchiveEvent = require('../archive-handling/transform-to-archive-schema')
+const { 
+  saveNewEvent,
+  updateEvent,
+} = require('../archive-handling/move-event');
 const validateEvent = require('../one-time-scripts/validate-event');
 
 const PORT = process.env.PORT || 5000;
@@ -25,13 +30,27 @@ app.use(cors({
 ));
 
 app.post('/event', (req, res) => {
+  const convertedEvent = makeArchiveEvent(req.body.level, req.body)
+  const {
+    th,
+    valid,
+    error,
+  } = validateEvent(convertedEvent);
+  th.error = valid ? false : error;
+  saveNewEvent(th.eventId, th).then((writeResult) => {
+    console.log(writeResult);
+    res.send(th);
+  });
+});
+
+app.patch('/event', (req, res) => {
   const {
     th,
     valid,
     error,
   } = validateEvent(req.body);
   th.error = valid ? false : error;
-  saveEvent(th.eventId, th).then((writeResult) => {
+  updateEvent(th.eventId, th).then((writeResult) => {
     console.log(writeResult);
     res.send(th);
   });
