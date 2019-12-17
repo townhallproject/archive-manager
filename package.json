@@ -9,7 +9,7 @@
   "scripts": {
     "copy-archive": "node src/one-time-scripts/copy-old-archive-to-firestore.js",
     "archive": "node src/archive-handling/index.js",
-    "server": "node src/server/index.js",
+    "start": "node src/server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
