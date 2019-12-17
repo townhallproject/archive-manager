@@ -6,6 +6,8 @@ require('dotenv').config();
 const { saveEvent } = require('../archive-handling/move-event');
 const validateEvent = require('../one-time-scripts/validate-event');
 
+const PORT = process.env.PORT || 5000;
+
 const whitelist = ['http://thp-admin.herokuapp.com', 'https://thp-admin.herokuapp.com', 'http://localhost:3000']
 
 const app = express();
@@ -35,6 +37,6 @@ app.post('/event', (req, res) => {
   });
 });
 
-const server = app.listen(5000, () => {
+const server = app.listen(PORT, () => {
   console.log('Listening on port ' + server.address().port);
 });
