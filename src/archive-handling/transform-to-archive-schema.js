@@ -63,7 +63,9 @@ const makeArchiveEvent = (level, th) => {
     out.timeEnd = moment(`${th.yearMonthDay} ${th.timeEnd}`, 'YYYY-MM-DD hh:mm A').tz(tzString).format();
     out.timeZone = tzString;
     out.lastUpdated = moment(th.lastUpdated).tz(tzString).format();
-    out.repeatingEvent = th.repeatingEvent || false;
+    if (th.repeatingEvent) {
+        out.repeatingEvent = th.repeatingEvent;
+    }
     // Cast the House and Senate to lower and upper
     switch (th.chamber) {
         case 'House':

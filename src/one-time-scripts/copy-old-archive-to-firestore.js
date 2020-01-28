@@ -10,7 +10,7 @@ const { moveEvent } = require('../archive-handling/move-event');
 const makeArchiveEvent = require('../archive-handling/transform-to-archive-schema');
 const getStateLegs = require('../lib/get-state-legs');
 const getMocData = require('../lib/get-moc-data');
-
+const validateEvent = require('./validate-event');
 const {
     firebase,
 } = require('../lib/setupFirebase');
@@ -35,19 +35,6 @@ const convertEvent = (level, th) => {
         }
     }
     return makeArchiveEvent(level, th);
-}
-
-const validateEvent = (th) => {
-  
-    // Validate that it complies with our schema
-    let valid = validate.townHall(th);
-    if (!valid) console.log(validate.townHall.errors);
-
-    return {
-        th,
-        valid,
-        error: !valid ? validate.townHall.errors[0] : null,
-    }
 }
 
 
