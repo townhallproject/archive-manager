@@ -39,7 +39,7 @@ const moveEvent = (oldPath, data) => {
         if (!shouldSave) {
             return Promise.resolve();
         }
-        return saveEvent(th.eventId, toSave)
+        return saveNewEvent(th.eventId, toSave)
             .then(() => {
                 console.log('moved event', th.eventId)
             })
