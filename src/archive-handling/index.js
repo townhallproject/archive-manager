@@ -29,24 +29,13 @@ const getUserId = townHall => {
   return townHall.enteredBy;
 }
 
-const updateUserWhenEventArchived = townhall => {
-  const uid = getUserId(townhall);
-
-  if (!uid) {
-      return Promise.resolve();
-  }
-
-  const path = `users/${uid}`;
-  const currentEvent = {
-      status: 'archived',
-  };
-
-  return firebase.ref(`${path}/events/${townhall.eventId}`).update(currentEvent);
-};
-
 const checkTimestamp = (th, now) => {
   // If this event has no date, skip it
   if (!th.dateObj) {
+    if (!th.repeatingEvent) {
+
+      console.log('missing date object', th.eventId, th)
+    }
     return false;
   }
 

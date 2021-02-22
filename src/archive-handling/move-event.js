@@ -7,6 +7,21 @@ const {
 // oldPath is the path that the original event came from
 // th is the new event to go into the archive
 
+const updateUserWhenEventArchived = townhall => {
+    const uid = getUserId(townhall);
+
+    if (!uid) {
+        return Promise.resolve();
+    }
+
+    const path = `users/${uid}`;
+    const currentEvent = {
+        status: 'archived',
+    };
+
+    return firebase.ref(`${path}/events/${townhall.eventId}`).update(currentEvent);
+};
+
 const moveEvent = (oldPath, data) => {
     const {
         th
@@ -44,18 +59,18 @@ const moveEvent = (oldPath, data) => {
                 console.log('moved event', th.eventId)
             })
     
-            //   .then(oldTownHall.remove)
-            //       .then(() => {
-            //           // Update the table of archived event refs
-            //           return firebase.ref(`/townHallIds/${th.eventId}`).update({
-            //               status: 'archived',
-            //               archive_path: 'archived_town_halls',
-            //           });
-            //       })
-            //       .then(() => {
-            //           // Update an event join against a user?
-            //           updateUserWhenEventArchived(th);
-            //       })
+              .then(oldTownHall.remove)
+                  .then(() => {
+                      // Update the table of archived event refs
+                      return firebase.ref(`/townHallIds/${th.eventId}`).update({
+                          status: 'archived',
+                          archive_path: 'archived_town_halls',
+                      });
+                  })
+                  .then(() => {
+                      // Update an event join against a user?
+                      updateUserWhenEventArchived(th);
+                  })
         
     })
 }
