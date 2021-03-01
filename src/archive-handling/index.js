@@ -16,25 +16,12 @@ const makeArchiveEvent = require('./transform-to-archive-schema');
 const validateEvent = require('../one-time-scripts/validate-event');
 
 
-// Get the user ID if it's not an email address
-const getUserId = townHall => {
-  if (townHall.userID && townHall.enteredBy.includes('@')) {
-      return townHall.userID;
-  }
-
-  if (townHall.enteredBy && townHall.enteredBy.includes('@')) {
-      return;
-  }
-
-  return townHall.enteredBy;
-}
-
 const checkTimestamp = (th, now) => {
   // If this event has no date, skip it
   if (!th.dateObj) {
     if (!th.repeatingEvent) {
 
-      console.log('missing date object', th.eventId, th)
+      console.log('missing date object', th.eventId)
     }
     return false;
   }
